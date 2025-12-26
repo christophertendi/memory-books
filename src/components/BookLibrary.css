@@ -134,6 +134,38 @@
   text-align: left;
 }
 
+.book-title-cover.clickable {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.book-title-cover.clickable:hover {
+  opacity: 0.85;
+}
+
+/* Book Title as Button */
+.book-title-button {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+}
+
+.book-title-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: white;
+}
+
 .book-page-count {
   font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.8);
@@ -203,6 +235,28 @@
 
 .desktop-only {
   display: flex;
+}
+
+/* Inline Edit Button on Book Cover */
+.book-edit-btn-inline {
+  display: none; /* Hidden on desktop */
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 0.4rem 1rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.book-edit-btn-inline:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 /* Add Book Button */
@@ -322,7 +376,7 @@
 
   /* Make book action buttons always visible on mobile */
   .book-actions-overlay {
-    opacity: 1 !important;
+    opacity: 0 !important; /* Hide overlay on mobile - we use inline button instead */
     background: rgba(0, 0, 0, 0.6);
   }
 
@@ -338,6 +392,11 @@
 
   .mobile-edit-book-btn {
     display: flex !important;
+  }
+
+  /* Show inline edit button on mobile */
+  .book-edit-btn-inline.mobile-only {
+    display: block;
   }
 }
 
