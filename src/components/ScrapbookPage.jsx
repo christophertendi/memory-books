@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Trash2, Plus, X, Edit2, Move, Filter, Tag } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import './ScrapbookPage.css';
 
 const ScrapbookPage = ({
@@ -131,12 +131,18 @@ const ScrapbookPage = ({
 
   const addCategory = () => {
     if (!newCategoryName.trim()) return;
+    
+    const categoryName = newCategoryName.trim();
     const updatedBooks = books.map((book) => {
       if (book.id === currentBook.id) {
         const newCategories = book.categories || [];
+        // Check if category already exists
+        if (newCategories.some(cat => cat.name === categoryName)) {
+          return book; // Don't add duplicate
+        }
         return {
           ...book,
-          categories: [...newCategories, { name: newCategoryName, color: '#6b7280' }]
+          categories: [...newCategories, { name: categoryName, color: '#6b7280' }]
         };
       }
       return book;
@@ -144,6 +150,43 @@ const ScrapbookPage = ({
     setBooks(updatedBooks);
     setCurrentBook(updatedBooks.find((b) => b.id === currentBook.id));
     setNewCategoryName('');
+    
+    return categoryName; // Return the category name for chaining
+  };
+
+  const addAndAssignCategory = () => {
+    const categoryName = newCategoryName.trim();
+    if (!categoryName) return;
+    
+    // First add the category to the book
+    const updatedBooks = books.map((book) => {
+      if (book.id === currentBook.id) {
+        const newCategories = book.categories || [];
+        // Check if category already exists
+        const categoryExists = newCategories.some(cat => cat.name === categoryName);
+        
+        // Update categories list
+        const updatedCategories = categoryExists 
+          ? newCategories 
+          : [...newCategories, { name: categoryName, color: '#6b7280' }];
+        
+        // Also assign to current page
+        const newMemories = [...book.memories];
+        newMemories[currentPage] = { ...newMemories[currentPage], category: categoryName };
+        
+        return { 
+          ...book, 
+          categories: updatedCategories,
+          memories: newMemories
+        };
+      }
+      return book;
+    });
+    
+    setBooks(updatedBooks);
+    setCurrentBook(updatedBooks.find((b) => b.id === currentBook.id));
+    setNewCategoryName('');
+    setShowCategoryModal(false);
   };
 
   return (
@@ -201,13 +244,6 @@ const ScrapbookPage = ({
         >
           {hasMemories ? (
             <div className="page-content">
-              <button 
-                className="category-btn-topleft"
-                onClick={() => setShowCategoryModal(true)}
-              >
-                <Tag size={16} />
-                {currentMemory.category || 'Assign Category'}
-              </button>
 
               <div className="scrapbook-collage jamboard-style">
                 {currentMemory.photos?.length > 0 ? (
@@ -262,37 +298,6 @@ const ScrapbookPage = ({
                   </div>
                 )}
               </div>
-
-              <div className="page-controls-bottom">
-                <button className="filter-btn-bottom" onClick={() => setShowFilterMenu(true)}>
-                  <Filter size={20} />
-                  {selectedFilters.length > 0 && (
-                    <span className="filter-count">{selectedFilters.length}</span>
-                  )}
-                </button>
-
-                <div className="center-nav-controls">
-                  <button
-                    className="page-btn"
-                    onClick={() => selectedFilters.length > 0 ? navigateFiltered(-1) : onPageChange(Math.max(0, currentPage - 1))}
-                    disabled={selectedFilters.length > 0 ? currentFilteredIndex === 0 : currentPage === 0}
-                  >
-                    <ChevronLeft size={24} />
-                  </button>
-
-                  <button className="action-btn delete" onClick={() => onDeletePage(currentPage)}>
-                    <Trash2 size={16} />
-                  </button>
-
-                  <button
-                    className="page-btn"
-                    onClick={() => selectedFilters.length > 0 ? navigateFiltered(1) : onPageChange(Math.min(currentBook.memories.length - 1, currentPage + 1))}
-                    disabled={selectedFilters.length > 0 ? currentFilteredIndex === totalFilteredPages - 1 : currentPage === currentBook.memories.length - 1}
-                  >
-                    <ChevronRight size={24} />
-                  </button>
-                </div>
-              </div>
             </div>
           ) : (
             <div className="empty-book">
@@ -300,6 +305,46 @@ const ScrapbookPage = ({
               <p className="empty-subtitle">Add your first memory to begin</p>
             </div>
           )}
+
+          {/* Center Navigation Controls */}
+          <div className="center-nav-controls">
+            <button
+              className="page-btn"
+              onClick={() => selectedFilters.length > 0 ? navigateFiltered(-1) : onPageChange(Math.max(0, currentPage - 1))}
+              disabled={selectedFilters.length > 0 ? currentFilteredIndex === 0 : currentPage === 0}
+            >
+              <ChevronLeft size={24} />
+            </button>
+
+            <button className="action-btn delete" onClick={() => onDeletePage(currentPage)}>
+              <Trash2 size={16} />
+            </button>
+
+            <button
+              className="page-btn"
+              onClick={() => selectedFilters.length > 0 ? navigateFiltered(1) : onPageChange(Math.min(currentBook.memories.length - 1, currentPage + 1))}
+              disabled={selectedFilters.length > 0 ? currentFilteredIndex === totalFilteredPages - 1 : currentPage === currentBook.memories.length - 1}
+            >
+              <ChevronRight size={24} />
+            </button>
+          </div>
+        </div>
+
+        {/* External Controls - Outside Page */}
+        <div className="external-controls">
+          <div className="left-external-controls">
+            <button className="external-btn filter-btn" onClick={() => setShowFilterMenu(true)}>
+              <Filter size={20} />
+              {selectedFilters.length > 0 && (
+                <span className="filter-count">{selectedFilters.length}</span>
+              )}
+            </button>
+
+            <button className="external-btn category-btn" onClick={() => setShowCategoryModal(true)}>
+              <Tag size={18} />
+              {currentMemory?.category || 'Category'}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -347,7 +392,10 @@ const ScrapbookPage = ({
       {showCategoryModal && (
         <div className="modal-overlay" onClick={() => setShowCategoryModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowCategoryModal(false)}>
+            <button 
+              className="modal-close" 
+              onClick={() => setShowCategoryModal(false)}
+            >
               <X size={24} />
             </button>
             <h3 className="modal-title">Assign Category to Page</h3>
@@ -381,11 +429,18 @@ const ScrapbookPage = ({
                 onChange={(e) => setNewCategoryName(e.target.value)}
                 placeholder="New category name"
                 className="category-input"
-                onKeyDown={(e) => { if (e.key === 'Enter') addCategory(); }}
+                onKeyDown={(e) => { 
+                  if (e.key === 'Enter') {
+                    addAndAssignCategory();
+                  }
+                }}
               />
-              <button className="btn-submit" onClick={addCategory}>
+              <button 
+                className="btn-submit" 
+                onClick={addAndAssignCategory}
+              >
                 <Plus size={16} />
-                Add Category
+                Add & Assign
               </button>
             </div>
           </div>

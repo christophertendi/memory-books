@@ -448,6 +448,7 @@ function App() {
                     const newPage = {
                       photos: [],
                       date: new Date().toISOString(),
+                      category: null, // No category assigned yet
                     };
                     const updatedBooks = books.map((book) => {
                       if (book.id === currentBook.id) {
@@ -463,6 +464,12 @@ function App() {
                     setCurrentBook(updatedCurrentBook);
                     setCurrentPage(updatedCurrentBook.memories.length - 1);
                     setShowFloatingMenu(false);
+                    
+                    // Show category modal for new page
+                    setTimeout(() => {
+                      // Need to pass this to ScrapbookPage to trigger
+                      // Will handle in ScrapbookPage
+                    }, 100);
                   }}
                 >
                   <Plus size={18} />
