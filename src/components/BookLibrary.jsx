@@ -9,55 +9,58 @@ const BookLibrary = ({ books, onOpenBook, onEditBook, onDeleteBook, onCreateBook
         <p className="library-subtitle">Store your precious moments, one page at a time</p>
       </div>
 
-      <div className="books-grid">
+      <div className="books-stack">
         {books.map((book, index) => (
           <div 
             key={book.id} 
-            className="book-card"
-            style={{ '--book-index': index }}
+            className="book-cover"
+            style={{ 
+              '--book-index': index,
+              '--total-books': books.length
+            }}
+            onClick={() => onOpenBook(book)}
           >
-            <div
-              className="book-spine"
+            <div 
+              className="book-front"
               style={{ backgroundColor: book.color }}
-              onClick={() => onOpenBook(book)}
             >
-              <div className="book-info">
-                <div className="book-name">{book.name}</div>
-                <div className="book-count">{book.memories.length}/10</div>
-                <div className="book-card-actions">
-                  <button 
-                    className="card-action-btn" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEditBook(book);
-                    }}
-                  >
-                    <Edit2 size={14} />
-                  </button>
-                  <button 
-                    className="card-action-btn" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteBook(book.id);
-                    }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </div>
+              <div className="book-title-cover">{book.name}</div>
+              <div className="book-page-count">{book.memories.length}/10 pages</div>
+            </div>
+            <div 
+              className="book-spine-side"
+              style={{ backgroundColor: book.color }}
+            >
+              <span>{book.name}</span>
+            </div>
+            <div className="book-actions-overlay">
+              <button 
+                className="book-action-btn" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditBook(book);
+                }}
+              >
+                <Edit2 size={16} />
+              </button>
+              <button 
+                className="book-action-btn" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteBook(book.id);
+                }}
+              >
+                <Trash2 size={16} />
+              </button>
             </div>
           </div>
         ))}
-
-        <button 
-          className="add-book-card" 
-          onClick={onCreateBook}
-          style={{ '--book-index': books.length }}
-        >
-          <Plus size={32} />
-          <span>New Book</span>
-        </button>
       </div>
+
+      <button className="add-book-btn-fixed" onClick={onCreateBook}>
+        <Plus size={20} />
+        <span>New Book</span>
+      </button>
     </div>
   );
 };
