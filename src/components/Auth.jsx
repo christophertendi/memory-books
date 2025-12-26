@@ -1,26 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Shield } from 'lucide-react';
 import { authService } from '../services/authService';
 import './Auth.css';
 
 const Auth = ({ onAuthSuccess }) => {
-  const [mode, setMode] = useState('login');
+  const [mode, setMode] = useState('login'); // 'login', 'register', 'verify-email'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-
-  // Listen to auth state changes
-  useEffect(() => {
-    const unsubscribe = authService.onAuthChange((user) => {
-      if (user && user.emailVerified) {
-        onAuthSuccess(user.email);
-      }
-    });
-    return () => unsubscribe();
-  }, [onAuthSuccess]);
+  const [loading, setLoading] = useState(false);
 
   // Password validation
   const validatePassword = (pwd) => {
@@ -38,10 +28,12 @@ const Auth = ({ onAuthSuccess }) => {
     };
   };
 
+  // Email validation
   const validateEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
+  // Handle registration
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
@@ -70,9 +62,11 @@ const Auth = ({ onAuthSuccess }) => {
     }
   };
 
+  // Handle login
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setMessage('');
 
     if (!validateEmail(email)) {
       setError('Please enter a valid email address');
@@ -90,19 +84,23 @@ const Auth = ({ onAuthSuccess }) => {
     }
   };
 
+  // Resend verification email
   const handleResendVerification = async () => {
     setLoading(true);
+    setError('');
+    setMessage('');
+    
     const result = await authService.resendVerification();
     setLoading(false);
 
     if (result.success) {
-      setMessage('Verification email sent! Check your inbox.');
+      setMessage(result.message);
     } else {
       setError(result.error);
     }
   };
 
-  // Email verification waiting screen
+  // Email verification screen
   if (mode === 'verify-email') {
     return (
       <div className="auth-container">
@@ -112,7 +110,7 @@ const Auth = ({ onAuthSuccess }) => {
             <h2>Verify Your Email</h2>
             <p>We've sent a verification link to <strong>{email}</strong></p>
             <p className="verify-instructions">
-              Click the link in the email to verify your account, then return here to login.
+              Click the link in your email to verify your account, then return here to login.
             </p>
           </div>
 
@@ -122,16 +120,10 @@ const Auth = ({ onAuthSuccess }) => {
           <div className="verify-actions">
             <button 
               className="auth-submit" 
-              onClick={handleResendVerification}
-              disabled={loading}
-            >
-              {loading ? 'Sending...' : 'Resend Verification Email'}
-            </button>
-            <button 
-              className="auth-link"
               onClick={() => setMode('login')}
             >
               Back to Login
+              <ArrowRight size={20} />
             </button>
           </div>
         </div>
