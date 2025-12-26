@@ -99,7 +99,7 @@ const ScrapbookPage = ({
         const newMemories = [...book.memories];
         newMemories[currentPage].photos[draggingPhoto] = {
           ...newMemories[currentPage].photos[draggingPhoto],
-          position: { x: Math.max(0, Math.min(80, x)), y: Math.max(0, Math.min(80, y)) }
+          position: { x: Math.max(-20, Math.min(100, x)), y: Math.max(-20, Math.min(100, y)) }
         };
         return { ...book, memories: newMemories };
       }
@@ -123,7 +123,7 @@ const ScrapbookPage = ({
         const newMemories = [...book.memories];
         newMemories[currentPage].photos[draggingPhoto] = {
           ...newMemories[currentPage].photos[draggingPhoto],
-          position: { x: Math.max(0, Math.min(80, x)), y: Math.max(0, Math.min(80, y)) }
+          position: { x: Math.max(-20, Math.min(100, x)), y: Math.max(-20, Math.min(100, y)) }
         };
         return { ...book, memories: newMemories };
       }
@@ -280,29 +280,50 @@ const ScrapbookPage = ({
           <ChevronLeft size={20} />
           Back to Library
         </button>
-        {editingTitle ? (
-          <input
-            type="text"
-            className="book-title-input"
-            value={currentBook.name}
-            onChange={(e) => {
-              const updatedBooks = books.map((b) =>
-                b.id === currentBook.id ? { ...b, name: e.target.value } : b
-              );
-              setBooks(updatedBooks);
-              setCurrentBook({ ...currentBook, name: e.target.value });
-            }}
-            onBlur={() => setEditingTitle(false)}
-            onKeyDown={(e) => { if (e.key === 'Enter') setEditingTitle(false); }}
-            autoFocus
-          />
-        ) : (
-          <h1 className="book-title" onClick={() => setEditingTitle(true)}>
-            {currentBook.name}
-            <Edit2 size={18} className="title-edit-icon" />
-          </h1>
-        )}
-        <div className="book-actions">
+      </div>
+
+      {/* Top Controls Bar - Above scrapbook page */}
+      <div className="top-controls-bar">
+        <div className="left-controls">
+          <button className="external-btn filter-btn" onClick={() => setShowFilterMenu(true)}>
+            <Filter size={20} />
+            {selectedFilters.length > 0 && (
+              <span className="filter-count">{selectedFilters.length}</span>
+            )}
+          </button>
+
+          <button className="external-btn category-btn" onClick={() => setShowCategoryModal(true)}>
+            <Tag size={18} />
+            {currentMemory?.category || 'Category'}
+          </button>
+        </div>
+
+        <div className="center-title">
+          {editingTitle ? (
+            <input
+              type="text"
+              className="book-title-input"
+              value={currentBook.name}
+              onChange={(e) => {
+                const updatedBooks = books.map((b) =>
+                  b.id === currentBook.id ? { ...b, name: e.target.value } : b
+                );
+                setBooks(updatedBooks);
+                setCurrentBook({ ...currentBook, name: e.target.value });
+              }}
+              onBlur={() => setEditingTitle(false)}
+              onKeyDown={(e) => { if (e.key === 'Enter') setEditingTitle(false); }}
+              autoFocus
+            />
+          ) : (
+            <h1 className="book-title" onClick={() => setEditingTitle(true)}>
+              {currentBook.name}
+              <Edit2 size={18} className="title-edit-icon" />
+            </h1>
+          )}
+        </div>
+
+        <div className="right-counter">
           <span className="page-counter">
             {selectedFilters.length > 0
               ? `${currentFilteredIndex + 1} / ${totalFilteredPages} (filtered)`
@@ -420,23 +441,6 @@ const ScrapbookPage = ({
               }
             >
               <ChevronRight size={24} />
-            </button>
-          </div>
-        </div>
-
-        {/* External Controls - Outside Page */}
-        <div className="external-controls">
-          <div className="left-external-controls">
-            <button className="external-btn filter-btn" onClick={() => setShowFilterMenu(true)}>
-              <Filter size={20} />
-              {selectedFilters.length > 0 && (
-                <span className="filter-count">{selectedFilters.length}</span>
-              )}
-            </button>
-
-            <button className="external-btn category-btn" onClick={() => setShowCategoryModal(true)}>
-              <Tag size={18} />
-              {currentMemory?.category || 'Category'}
             </button>
           </div>
         </div>

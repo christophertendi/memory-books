@@ -6,10 +6,36 @@
 
 .book-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  margin-bottom: 3rem;
+  padding: 2rem 2rem 1rem;
   gap: 2rem;
+}
+
+/* Top Controls Bar */
+.top-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem 1.5rem;
+  gap: 2rem;
+}
+
+.left-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  min-width: 200px;
+}
+
+.center-title {
+  flex: 1;
+  text-align: center;
+}
+
+.right-counter {
+  min-width: 120px;
+  text-align: right;
 }
 
 .back-btn {
@@ -912,6 +938,32 @@
 
 /* Mobile Updates */
 @media (max-width: 768px) {
+  .book-header {
+    padding: 1rem;
+  }
+
+  .top-controls-bar {
+    padding: 0 1rem 1rem;
+    gap: 1rem;
+  }
+
+  .left-controls {
+    min-width: auto;
+  }
+
+  .right-counter {
+    min-width: auto;
+  }
+
+  .book-title {
+    font-size: 1.5rem;
+  }
+
+  .external-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
   .page-controls {
     padding: 0 0.5rem;
     bottom: 1rem; /* Move controls closer to bottom on mobile */
@@ -947,17 +999,6 @@
   .nav-controls {
     padding: 0.5rem 1rem;
     gap: 1rem;
-  }
-
-  /* Keep external controls at bottom left on mobile too */
-  .external-controls {
-    bottom: 2rem;
-    left: 1rem;
-    right: auto;
-  }
-
-  .left-external-controls {
-    gap: 0.5rem;
   }
 
   .external-btn {
