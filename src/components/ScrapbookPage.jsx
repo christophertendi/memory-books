@@ -97,12 +97,16 @@ const ScrapbookPage = ({
     const x = ((e.clientX - rect.left - dragOffset.x) / rect.width) * 100;
     const y = ((e.clientY - rect.top - dragOffset.y) / rect.height) * 100;
     
+    // Desktop gets more freedom (larger limits)
+    const maxX = 75;
+    const maxY = 80;
+    
     const updatedBooks = books.map((book) => {
       if (book.id === currentBook.id) {
         const newMemories = [...book.memories];
         newMemories[currentPage].photos[draggingPhoto] = {
           ...newMemories[currentPage].photos[draggingPhoto],
-          position: { x: Math.max(-5, Math.min(65, x)), y: Math.max(-5, Math.min(70, y)) }
+          position: { x: Math.max(-5, Math.min(maxX, x)), y: Math.max(-5, Math.min(maxY, y)) }
         };
         return { ...book, memories: newMemories };
       }
@@ -121,12 +125,16 @@ const ScrapbookPage = ({
     const x = ((touch.clientX - rect.left - dragOffset.x) / rect.width) * 100;
     const y = ((touch.clientY - rect.top - dragOffset.y) / rect.height) * 100;
     
+    // Mobile gets tighter constraints to prevent overflow
+    const maxX = 60;
+    const maxY = 70;
+    
     const updatedBooks = books.map((book) => {
       if (book.id === currentBook.id) {
         const newMemories = [...book.memories];
         newMemories[currentPage].photos[draggingPhoto] = {
           ...newMemories[currentPage].photos[draggingPhoto],
-          position: { x: Math.max(-5, Math.min(65, x)), y: Math.max(-5, Math.min(70, y)) }
+          position: { x: Math.max(-5, Math.min(maxX, x)), y: Math.max(-5, Math.min(maxY, y)) }
         };
         return { ...book, memories: newMemories };
       }
@@ -321,7 +329,7 @@ const ScrapbookPage = ({
           ) : (
             <h1 className="book-title" onClick={() => setEditingTitle(true)}>
               {currentBook.name}
-              <Edit2 size={16} className="title-edit-icon" />
+              <Edit2 size={18} className="title-edit-icon" />
             </h1>
           )}
         </div>
