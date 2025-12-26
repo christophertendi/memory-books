@@ -24,6 +24,7 @@ function App() {
   const [designingBook, setDesigningBook] = useState(null);
   const [editingMemory, setEditingMemory] = useState(null);
   const [editingTitle, setEditingTitle] = useState(false);
+  const [activeFilters, setActiveFilters] = useState([]); // Track active category filters
   const [bookForm, setBookForm] = useState({
     name: '',
     color: '#2c2c2c',
@@ -207,6 +208,19 @@ function App() {
   const handleOpenBook = (book) => {
     setCurrentBook(book);
     setCurrentPage(0);
+    setActiveFilters([]); // Reset filters when opening a new book
+  };
+
+  // Check if current page exists in filtered results (or no filters active)
+  const isCurrentPageValid = () => {
+    if (!currentBook || activeFilters.length === 0) return true;
+    
+    const filteredPages = currentBook.memories
+      .map((memory, idx) => ({ ...memory, originalIndex: idx }))
+      .filter(memory => activeFilters.includes(memory.category))
+      .map(memory => memory.originalIndex);
+    
+    return filteredPages.includes(currentPage);
   };
 
   const handleAddMemory = (e) => {
@@ -411,15 +425,20 @@ function App() {
             setEditingMemory({ pageIndex });
             setShowMemoryModal(true);
           }}
-          onBack={() => setCurrentBook(null)}
+          onBack={() => {
+            setCurrentBook(null);
+            setActiveFilters([]); // Reset filters when closing book
+          }}
           editingTitle={editingTitle}
           setEditingTitle={setEditingTitle}
           books={books}
           setBooks={setBooks}
           setCurrentBook={setCurrentBook}
+          onFilterChange={setActiveFilters}
         />
 
-        {currentBook.memories.length < 10 && (
+        {/* Only show floating menu if on a valid page and book isn't full */}
+        {currentBook.memories.length < 10 && isCurrentPageValid() && (
           <>
             <button
               className="add-memory-btn floating"

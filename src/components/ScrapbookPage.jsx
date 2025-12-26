@@ -13,7 +13,8 @@ const ScrapbookPage = ({
   setEditingTitle,
   books,
   setBooks,
-  setCurrentBook
+  setCurrentBook,
+  onFilterChange // Callback to notify parent of filter changes
 }) => {
   const [draggingPhoto, setDraggingPhoto] = useState(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -127,12 +128,24 @@ const ScrapbookPage = ({
   };
 
   const toggleFilter = (categoryName) => {
-    setSelectedFilters(prev => 
-      prev.includes(categoryName) ? prev.filter(f => f !== categoryName) : [...prev, categoryName]
-    );
+    setSelectedFilters(prev => {
+      const newFilters = prev.includes(categoryName) 
+        ? prev.filter(f => f !== categoryName) 
+        : [...prev, categoryName];
+      
+      // Notify parent component
+      if (onFilterChange) {
+        onFilterChange(newFilters);
+      }
+      
+      return newFilters;
+    });
   };
 
   const navigateFiltered = (direction) => {
+    // Don't navigate if only one page in filtered results
+    if (totalFilteredPages <= 1) return;
+    
     const newIndex = currentFilteredIndex + direction;
     if (newIndex >= 0 && newIndex < totalFilteredPages) {
       onPageChange(filteredPages[newIndex]);
@@ -425,6 +438,9 @@ const ScrapbookPage = ({
             <div className="filter-actions">
               <button className="btn-secondary" onClick={() => {
                 setSelectedFilters([]);
+                if (onFilterChange) {
+                  onFilterChange([]);
+                }
               }}>
                 Clear Filters
               </button>
