@@ -943,16 +943,68 @@
 /* Mobile Updates */
 @media (max-width: 768px) {
   .page-controls {
-    padding: 0 1rem;
+    padding: 0 0.5rem;
+    bottom: 1rem; /* Move controls closer to bottom on mobile */
   }
 
-  .filter-btn {
-    padding: 0.65rem 0.9rem;
+  /* Make navigation buttons smaller on mobile */
+  .page-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .action-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .action-btn.delete {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fca5a5;
   }
 
   .nav-controls {
-    padding: 0.65rem 1.25rem;
-    gap: 1.5rem;
+    padding: 0.5rem 1rem;
+    gap: 1rem;
+  }
+
+  /* Move external controls to top left on mobile */
+  .external-controls {
+    bottom: auto;
+    top: 1rem;
+    left: 1rem;
+    right: auto;
+  }
+
+  .left-external-controls {
+    gap: 0.5rem;
+  }
+
+  .external-btn {
+    padding: 0.5rem 0.85rem;
+    font-size: 0.8rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .filter-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .external-btn .filter-count {
+    width: 18px;
+    height: 18px;
+    font-size: 0.65rem;
+  }
+
+  .category-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .category-list {
@@ -961,6 +1013,53 @@
 
   .add-category-section {
     flex-direction: column;
+  }
+
+  /* Make polaroid photo actions always visible on mobile for easier access */
+  .photo-actions {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 0.25rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .photo-action-btn {
+    background: white;
+    color: var(--text);
+    border: 1px solid var(--border);
+    width: 32px;
+    height: 32px;
+  }
+
+  .photo-action-btn.edit {
+    color: #3b82f6;
+    border-color: #3b82f6;
+  }
+
+  .photo-action-btn.delete {
+    color: #dc2626;
+    border-color: #dc2626;
+  }
+
+  /* Make drag indicator more prominent on mobile */
+  .drag-indicator {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    bottom: 0.25rem;
+  }
+
+  /* Increase touch target for polaroids */
+  .polaroid-photo {
+    cursor: grab;
+    touch-action: none; /* Better touch handling */
+  }
+
+  .polaroid-photo:active {
+    cursor: grabbing;
   }
 }
 

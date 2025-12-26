@@ -79,6 +79,14 @@ const ScrapbookPage = ({
     setDragOffset({ x: e.clientX - rect.left, y: e.clientY - rect.top });
   };
 
+  const handleTouchStart = (e, photoIndex) => {
+    if (e.target.closest('.photo-action-btn') || e.target.closest('.polaroid-image')) return;
+    const touch = e.touches[0];
+    const rect = e.currentTarget.getBoundingClientRect();
+    setDraggingPhoto(photoIndex);
+    setDragOffset({ x: touch.clientX - rect.left, y: touch.clientY - rect.top });
+  };
+
   const handleMouseMove = (e) => {
     if (draggingPhoto === null) return;
     const container = document.querySelector('.scrapbook-collage');
@@ -101,7 +109,32 @@ const ScrapbookPage = ({
     setCurrentBook(updatedBooks.find((b) => b.id === currentBook.id));
   };
 
+  const handleTouchMove = (e) => {
+    if (draggingPhoto === null) return;
+    e.preventDefault(); // Prevent scrolling while dragging
+    const touch = e.touches[0];
+    const container = document.querySelector('.scrapbook-collage');
+    const rect = container.getBoundingClientRect();
+    const x = ((touch.clientX - rect.left - dragOffset.x) / rect.width) * 100;
+    const y = ((touch.clientY - rect.top - dragOffset.y) / rect.height) * 100;
+    
+    const updatedBooks = books.map((book) => {
+      if (book.id === currentBook.id) {
+        const newMemories = [...book.memories];
+        newMemories[currentPage].photos[draggingPhoto] = {
+          ...newMemories[currentPage].photos[draggingPhoto],
+          position: { x: Math.max(0, Math.min(80, x)), y: Math.max(0, Math.min(80, y)) }
+        };
+        return { ...book, memories: newMemories };
+      }
+      return book;
+    });
+    setBooks(updatedBooks);
+    setCurrentBook(updatedBooks.find((b) => b.id === currentBook.id));
+  };
+
   const handleMouseUp = () => setDraggingPhoto(null);
+  const handleTouchEnd = () => setDraggingPhoto(null);
   const handleEditCaption = (photoIndex) => setEditingPhotoCaption(photoIndex);
 
   const handleSaveCaption = (photoIndex, newInnerCaption, newOuterCaption) => {
@@ -292,6 +325,9 @@ const ScrapbookPage = ({
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
         >
           {hasMemories ? (
             <div className="page-content">
@@ -310,6 +346,7 @@ const ScrapbookPage = ({
                           cursor: draggingPhoto === idx ? 'grabbing' : 'grab'
                         }}
                         onMouseDown={(e) => handleMouseDown(e, idx)}
+                        onTouchStart={(e) => handleTouchStart(e, idx)}
                       >
                         <div className="polaroid-photo">
                           <div 
