@@ -78,7 +78,7 @@ const Auth = ({ onAuthSuccess }) => {
     setLoading(false);
 
     if (result.success) {
-      onAuthSuccess(result.user.email);
+      onAuthSuccess(result.user);  // Pass whole user object
     } else {
       setError(result.error);
     }

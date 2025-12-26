@@ -116,9 +116,10 @@ function App() {
     };
   }, [books, isAuthenticated, userId]);
 
-  const handleAuthSuccess = (email) => {
-    setCurrentUser(email);
-    setUserId(email);
+  const handleAuthSuccess = (user) => {
+    console.log('🎉 Auth success! User:', user);
+    setCurrentUser(user.email);
+    setUserId(user.uid);  // Use UID not email!
     setIsAuthenticated(true);
   };
 
