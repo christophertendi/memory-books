@@ -942,21 +942,39 @@
     padding: 1rem;
   }
 
+  .back-btn {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.85rem;
+  }
+
   .top-controls-bar {
+    flex-wrap: wrap;
     padding: 0 1rem 1rem;
     gap: 1rem;
+    align-items: center;
+  }
+
+  .center-title {
+    order: 1;
+    width: 100%;
+    flex: none;
   }
 
   .left-controls {
-    min-width: auto;
+    order: 2;
+    flex: 0 0 auto;
   }
 
   .right-counter {
-    min-width: auto;
+    order: 3;
+    flex: 1;
+    text-align: right;
   }
 
   .book-title {
     font-size: 1.5rem;
+    justify-content: center;
+    width: 100%;
   }
 
   .external-btn {
@@ -966,7 +984,7 @@
 
   .page-controls {
     padding: 0 0.5rem;
-    bottom: 1rem; /* Move controls closer to bottom on mobile */
+    bottom: 1rem;
   }
 
   /* Make scrapbook page taller on mobile for more photos */
