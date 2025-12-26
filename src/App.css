@@ -1135,3 +1135,15 @@ body {
     font-size: 0.95rem;
   }
 }
+
+.form-group label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.word-count {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: normal;
+}

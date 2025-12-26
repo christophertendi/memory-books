@@ -12,6 +12,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [loading, setLoading] = useState(true); // Add loading state
   const [books, setBooks] = useState([]);
   const [currentBook, setCurrentBook] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -33,30 +34,52 @@ function App() {
     outerCaption: '',
   });
 
-  // Listen to Firebase auth state changes
-  useEffect(() => {
-    const unsubscribe = authService.onAuthChange((user) => {
-      if (user && user.emailVerified) {
-        setCurrentUser(user.email);
-        setUserId(user.uid);
-        setIsAuthenticated(true);
-      } else {
-        setCurrentUser(null);
-        setUserId(null);
-        setIsAuthenticated(false);
-      }
-    });
+  // Validate word count (max 20 words)
+  const validateWordCount = (text, maxWords = 20) => {
+    const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+    return words.length <= maxWords;
+  };
 
-    return () => unsubscribe();
+  const handleCaptionChange = (field, value) => {
+    if (validateWordCount(value, 20)) {
+      setMemoryForm({ ...memoryForm, [field]: value });
+    }
+  };
+
+  // Force logout on page load, then listen to auth state
+  useEffect(() => {
+    // Logout any existing session first
+    authService.logout().then(() => {
+      // Now listen for auth changes
+      const unsubscribe = authService.onAuthChange((user) => {
+        if (user && user.emailVerified) {
+          setCurrentUser(user.email);
+          setUserId(user.uid);
+          setIsAuthenticated(true);
+        } else {
+          setCurrentUser(null);
+          setUserId(null);
+          setIsAuthenticated(false);
+        }
+        setLoading(false); // Auth state determined
+      });
+
+      return () => unsubscribe();
+    });
   }, []);
 
   // Load user-specific books from Firestore
   useEffect(() => {
     const loadUserBooks = async () => {
       if (isAuthenticated && userId) {
+        console.log('📥 Loading books from Firestore...', { userId });
         const result = await firestoreService.loadBooks(userId);
+        
         if (result.success) {
+          console.log('✅ Loaded', result.books.length, 'books');
           setBooks(result.books);
+        } else {
+          console.error('❌ Load failed:', result.error);
         }
       }
     };
@@ -65,13 +88,34 @@ function App() {
 
   // Save user-specific books to Firestore (debounced)
   useEffect(() => {
-    if (!isAuthenticated || !userId || books.length === 0) return;
+    if (!isAuthenticated || !userId) {
+      console.log('❌ Not saving - not authenticated or no userId');
+      return;
+    }
 
+    if (books.length === 0) {
+      console.log('ℹ️ No books to save yet');
+      return;
+    }
+
+    console.log('⏱️ Scheduling save for', books.length, 'books...');
+    
     const saveTimer = setTimeout(async () => {
-      await firestoreService.saveBooks(userId, books);
+      console.log('💾 Saving books to Firestore...', { userId, bookCount: books.length });
+      const result = await firestoreService.saveBooks(userId, books);
+      
+      if (result.success) {
+        console.log('✅ Books saved successfully!');
+      } else {
+        console.error('❌ Save failed:', result.error);
+        alert('Failed to save: ' + result.error);
+      }
     }, 2000); // Save 2 seconds after changes stop
 
-    return () => clearTimeout(saveTimer);
+    return () => {
+      console.log('🔄 Save cancelled - new changes detected');
+      clearTimeout(saveTimer);
+    };
   }, [books, isAuthenticated, userId]);
 
   const handleAuthSuccess = (email) => {
@@ -89,6 +133,25 @@ function App() {
     setCurrentBook(null);
   };
 
+  // Show loading screen while checking auth state
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        fontSize: '1.5rem',
+        fontFamily: 'Playfair Display, serif'
+      }}>
+        Memory Books
+      </div>
+    );
+  }
+
+  // Show auth screen if not authenticated
   if (!isAuthenticated) {
     return <Auth onAuthSuccess={handleAuthSuccess} />;
   }
@@ -443,20 +506,30 @@ function App() {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Caption (inside polaroid)</label>
+                  <label>
+                    Caption (inside polaroid)
+                    <span className="word-count">
+                      {memoryForm.innerCaption.trim().split(/\s+/).filter(w => w).length}/20 words
+                    </span>
+                  </label>
                   <input
                     type="text"
                     value={memoryForm.innerCaption}
-                    onChange={(e) => setMemoryForm({ ...memoryForm, innerCaption: e.target.value })}
-                    placeholder="Short caption inside the photo..."
+                    onChange={(e) => handleCaptionChange('innerCaption', e.target.value)}
+                    placeholder="Short caption inside the photo... (max 20 words)"
                   />
                 </div>
                 <div className="form-group">
-                  <label>Caption (outside polaroid)</label>
+                  <label>
+                    Caption (outside polaroid)
+                    <span className="word-count">
+                      {memoryForm.outerCaption.trim().split(/\s+/).filter(w => w).length}/20 words
+                    </span>
+                  </label>
                   <textarea
                     value={memoryForm.outerCaption}
-                    onChange={(e) => setMemoryForm({ ...memoryForm, outerCaption: e.target.value })}
-                    placeholder="Additional notes beside the photo..."
+                    onChange={(e) => handleCaptionChange('outerCaption', e.target.value)}
+                    placeholder="Additional notes beside the photo... (max 20 words)"
                     rows="3"
                   />
                 </div>
