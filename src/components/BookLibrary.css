@@ -146,7 +146,7 @@
 /* Book Title as Button */
 .book-title-button {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: none;
   padding: 0.4rem 0.8rem;
   border-radius: 4px;
   font-size: 0.85rem;
@@ -163,7 +163,6 @@
 
 .book-title-button:hover {
   background: rgba(255, 255, 255, 0.15);
-  border-color: white;
 }
 
 .book-page-count {
@@ -348,6 +347,7 @@
   .books-stack {
     max-width: 320px;
     padding: 2rem 0.5rem;
+    margin: 0 auto;
   }
 
   .book-cover {

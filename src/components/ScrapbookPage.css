@@ -1032,11 +1032,15 @@
   .left-controls {
     order: 3;
     flex: 1;
+    min-width: 0;
+    display: flex;
+    justify-content: flex-start;
   }
 
   .right-counter {
     order: 4;
     flex: 1;
+    min-width: 0;
     text-align: right;
   }
 
@@ -1044,6 +1048,7 @@
     font-size: 1.5rem;
     width: auto;
     flex: none;
+    margin: 0 auto;
   }
 
   .external-btn {

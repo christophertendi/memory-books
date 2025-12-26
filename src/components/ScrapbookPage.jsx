@@ -321,7 +321,7 @@ const ScrapbookPage = ({
           ) : (
             <h1 className="book-title" onClick={() => setEditingTitle(true)}>
               {currentBook.name}
-              <Edit2 size={18} className="title-edit-icon" />
+              <Edit2 size={16} className="title-edit-icon" />
             </h1>
           )}
         </div>
@@ -648,7 +648,11 @@ const ScrapbookPage = ({
                 className="edit-option-btn"
                 onClick={() => {
                   setShowEditModal(false);
-                  if (onDesignCover) onDesignCover(currentBook);
+                  onBack(); // Close the book first
+                  if (onDesignCover) {
+                    // Small delay to ensure state updates
+                    setTimeout(() => onDesignCover(currentBook), 100);
+                  }
                 }}
               >
                 <Palette size={20} />
