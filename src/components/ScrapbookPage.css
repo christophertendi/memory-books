@@ -42,13 +42,13 @@
   background: transparent;
   border: 1px solid var(--border);
   color: var(--text);
-  padding: 0.75rem 1.25rem;
+  padding: 0.6rem 1rem;
   border-radius: 4px;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 500;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -943,8 +943,8 @@
   }
 
   .back-btn {
-    font-size: 0.75rem;
-    padding: 0.5rem 0.85rem;
+    font-size: 0.7rem;
+    padding: 0.45rem 0.75rem;
   }
 
   .top-controls-bar {
@@ -958,11 +958,13 @@
     order: 1;
     width: 100%;
     flex: none;
+    display: flex;
+    justify-content: center;
   }
 
   .left-controls {
     order: 2;
-    flex: 0 0 auto;
+    flex: 1;
   }
 
   .right-counter {
@@ -973,8 +975,8 @@
 
   .book-title {
     font-size: 1.5rem;
-    justify-content: center;
-    width: 100%;
+    width: auto;
+    flex: none;
   }
 
   .external-btn {

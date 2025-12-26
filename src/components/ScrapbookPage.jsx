@@ -99,7 +99,7 @@ const ScrapbookPage = ({
         const newMemories = [...book.memories];
         newMemories[currentPage].photos[draggingPhoto] = {
           ...newMemories[currentPage].photos[draggingPhoto],
-          position: { x: Math.max(0, Math.min(75, x)), y: Math.max(0, Math.min(85, y)) }
+          position: { x: Math.max(-5, Math.min(70, x)), y: Math.max(-5, Math.min(75, y)) }
         };
         return { ...book, memories: newMemories };
       }
@@ -123,7 +123,7 @@ const ScrapbookPage = ({
         const newMemories = [...book.memories];
         newMemories[currentPage].photos[draggingPhoto] = {
           ...newMemories[currentPage].photos[draggingPhoto],
-          position: { x: Math.max(0, Math.min(75, x)), y: Math.max(0, Math.min(85, y)) }
+          position: { x: Math.max(-5, Math.min(70, x)), y: Math.max(-5, Math.min(75, y)) }
         };
         return { ...book, memories: newMemories };
       }

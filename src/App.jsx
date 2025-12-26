@@ -587,6 +587,7 @@ function App() {
         }}
         onDesignCover={handleDesignCover}
         onLogout={handleLogout}
+        hideMenu={showCoverDesigner || showBookModal}
       />
 
       {showCoverDesigner && (
