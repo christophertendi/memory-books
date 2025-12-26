@@ -1,16 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Shield } from 'lucide-react';
+import { authService } from '../services/authService';
 import './Auth.css';
 
 const Auth = ({ onAuthSuccess }) => {
-  const [mode, setMode] = useState('login'); // 'login', 'register', 'verify-otp'
+  const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [pendingEmail, setPendingEmail] = useState('');
+  const [message, setMessage] = useState('');
+
+  // Listen to auth state changes
+  useEffect(() => {
+    const unsubscribe = authService.onAuthChange((user) => {
+      if (user && user.emailVerified) {
+        onAuthSuccess(user.email);
+      }
+    });
+    return () => unsubscribe();
+  }, [onAuthSuccess]);
 
   // Password validation
   const validatePassword = (pwd) => {
@@ -28,25 +38,14 @@ const Auth = ({ onAuthSuccess }) => {
     };
   };
 
-  // Email validation
   const validateEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  // Simulate sending OTP
-  const sendOTP = async (userEmail) => {
-    // In production, this would call your backend API
-    const mockOTP = '123456';
-    console.log(`OTP sent to ${userEmail}: ${mockOTP}`);
-    localStorage.setItem('mockOTP', mockOTP);
-    localStorage.setItem('otpEmail', userEmail);
-    return true;
-  };
-
-  // Handle registration
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
+    setMessage('');
 
     if (!validateEmail(email)) {
       setError('Please enter a valid email address');
@@ -59,57 +58,18 @@ const Auth = ({ onAuthSuccess }) => {
       return;
     }
 
-    // Check if email already exists
-    const existingUsers = JSON.parse(localStorage.getItem('users') || '{}');
-    if (existingUsers[email]) {
-      setError('Email already registered. Please login instead.');
-      return;
-    }
-
     setLoading(true);
-    try {
-      await sendOTP(email);
-      setPendingEmail(email);
-      setMode('verify-otp');
-    } catch (err) {
-      setError('Failed to send verification code. Please try again.');
-    } finally {
-      setLoading(false);
+    const result = await authService.register(email, password);
+    setLoading(false);
+
+    if (result.success) {
+      setMessage(result.message);
+      setMode('verify-email');
+    } else {
+      setError(result.error);
     }
   };
 
-  // Handle OTP verification
-  const handleVerifyOTP = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    const enteredOTP = otp.join('');
-    const storedOTP = localStorage.getItem('mockOTP');
-    const otpEmail = localStorage.getItem('otpEmail');
-
-    if (enteredOTP !== storedOTP || otpEmail !== pendingEmail) {
-      setError('Invalid verification code. Please try again.');
-      return;
-    }
-
-    // Save user
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
-    users[pendingEmail] = {
-      email: pendingEmail,
-      password: password, // In production, this should be hashed
-      createdAt: new Date().toISOString()
-    };
-    localStorage.setItem('users', JSON.stringify(users));
-    localStorage.setItem('currentUser', pendingEmail);
-    
-    // Clean up OTP
-    localStorage.removeItem('mockOTP');
-    localStorage.removeItem('otpEmail');
-
-    onAuthSuccess(pendingEmail);
-  };
-
-  // Handle login
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -119,106 +79,67 @@ const Auth = ({ onAuthSuccess }) => {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
-    const user = users[email];
+    setLoading(true);
+    const result = await authService.login(email, password);
+    setLoading(false);
 
-    if (!user) {
-      setError('No account found with this email. Please register.');
-      return;
-    }
-
-    if (user.password !== password) {
-      setError('Incorrect password. Please try again.');
-      return;
-    }
-
-    localStorage.setItem('currentUser', email);
-    onAuthSuccess(email);
-  };
-
-  // Handle OTP input
-  const handleOTPChange = (index, value) => {
-    if (value.length > 1) {
-      value = value[0];
-    }
-    
-    if (!/^\d*$/.test(value)) return;
-
-    const newOTP = [...otp];
-    newOTP[index] = value;
-    setOtp(newOTP);
-
-    // Auto-focus next input
-    if (value && index < 5) {
-      document.getElementById(`otp-${index + 1}`)?.focus();
+    if (result.success) {
+      onAuthSuccess(result.user.email);
+    } else {
+      setError(result.error);
     }
   };
 
-  // Handle OTP paste
-  const handleOTPPaste = (e) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').slice(0, 6);
-    if (!/^\d+$/.test(pastedData)) return;
-    
-    const newOTP = pastedData.split('').concat(Array(6).fill('')).slice(0, 6);
-    setOtp(newOTP);
+  const handleResendVerification = async () => {
+    setLoading(true);
+    const result = await authService.resendVerification();
+    setLoading(false);
+
+    if (result.success) {
+      setMessage('Verification email sent! Check your inbox.');
+    } else {
+      setError(result.error);
+    }
   };
 
-  if (mode === 'verify-otp') {
+  // Email verification waiting screen
+  if (mode === 'verify-email') {
     return (
       <div className="auth-container">
         <div className="auth-card">
           <div className="auth-header">
             <Shield size={48} className="auth-icon" />
             <h2>Verify Your Email</h2>
-            <p>We've sent a 6-digit code to <strong>{pendingEmail}</strong></p>
+            <p>We've sent a verification link to <strong>{email}</strong></p>
+            <p className="verify-instructions">
+              Click the link in the email to verify your account, then return here to login.
+            </p>
           </div>
 
-          <form onSubmit={handleVerifyOTP} className="auth-form">
-            <div className="otp-inputs" onPaste={handleOTPPaste}>
-              {otp.map((digit, index) => (
-                <input
-                  key={index}
-                  id={`otp-${index}`}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleOTPChange(index, e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Backspace' && !digit && index > 0) {
-                      document.getElementById(`otp-${index - 1}`)?.focus();
-                    }
-                  }}
-                  className="otp-input"
-                />
-              ))}
-            </div>
+          {message && <div className="auth-success">{message}</div>}
+          {error && <div className="auth-error">{error}</div>}
 
-            {error && <div className="auth-error">{error}</div>}
-
-            <button type="submit" className="auth-submit" disabled={otp.join('').length !== 6}>
-              Verify & Create Account
-              <ArrowRight size={20} />
-            </button>
-
+          <div className="verify-actions">
             <button 
-              type="button" 
-              className="auth-link"
-              onClick={() => {
-                setMode('register');
-                setOtp(['', '', '', '', '', '']);
-                setError('');
-              }}
+              className="auth-submit" 
+              onClick={handleResendVerification}
+              disabled={loading}
             >
-              Back to registration
+              {loading ? 'Sending...' : 'Resend Verification Email'}
             </button>
-          </form>
+            <button 
+              className="auth-link"
+              onClick={() => setMode('login')}
+            >
+              Back to Login
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
+  // Login/Register form
   return (
     <div className="auth-container">
       <div className="auth-card">
@@ -282,6 +203,7 @@ const Auth = ({ onAuthSuccess }) => {
             )}
           </div>
 
+          {message && <div className="auth-success">{message}</div>}
           {error && <div className="auth-error">{error}</div>}
 
           <button type="submit" className="auth-submit" disabled={loading}>
@@ -293,14 +215,14 @@ const Auth = ({ onAuthSuccess }) => {
             {mode === 'login' ? (
               <>
                 Don't have an account?{' '}
-                <button type="button" onClick={() => { setMode('register'); setError(''); }}>
+                <button type="button" onClick={() => { setMode('register'); setError(''); setMessage(''); }}>
                   Create one
                 </button>
               </>
             ) : (
               <>
                 Already have an account?{' '}
-                <button type="button" onClick={() => { setMode('login'); setError(''); }}>
+                <button type="button" onClick={() => { setMode('login'); setError(''); setMessage(''); }}>
                   Sign in
                 </button>
               </>
