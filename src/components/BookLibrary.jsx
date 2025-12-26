@@ -1,7 +1,9 @@
-import { Plus, Edit2, Trash2, Palette, LogOut } from 'lucide-react';
+import { Plus, Edit2, Trash2, Palette, LogOut, Menu, X } from 'lucide-react';
+import { useState } from 'react';
 import './BookLibrary.css';
 
 const BookLibrary = ({ books, onOpenBook, onEditBook, onDeleteBook, onCreateBook, onDesignCover, onLogout }) => {
+  const [showSidebar, setShowSidebar] = useState(false);
   const getCoverStyle = (book) => {
     if (!book.coverDesign) {
       return { backgroundColor: book.color };
@@ -52,10 +54,28 @@ const BookLibrary = ({ books, onOpenBook, onEditBook, onDeleteBook, onCreateBook
           <h1 className="library-title">Memory Books</h1>
           <p className="library-subtitle">Store your precious moments, one page at a time</p>
         </div>
-        <button className="logout-btn" onClick={onLogout} title="Logout">
-          <LogOut size={20} />
-          Logout
+        <button 
+          className={`burger-menu ${showSidebar ? 'open' : ''}`}
+          onClick={() => setShowSidebar(!showSidebar)}
+          aria-label="Menu"
+        >
+          {showSidebar ? <X size={24} /> : <Menu size={24} />}
         </button>
+      </div>
+
+      {/* Sidebar */}
+      <div className={`sidebar-overlay ${showSidebar ? 'active' : ''}`} onClick={() => setShowSidebar(false)} />
+      <div className={`sidebar ${showSidebar ? 'active' : ''}`}>
+        <div className="sidebar-content">
+          <h3 className="sidebar-title">Menu</h3>
+          <button className="sidebar-logout-btn" onClick={() => {
+            onLogout();
+            setShowSidebar(false);
+          }}>
+            <LogOut size={20} />
+            Logout
+          </button>
+        </div>
       </div>
 
       <div className="books-stack">

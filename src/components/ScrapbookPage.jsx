@@ -313,13 +313,6 @@ const ScrapbookPage = ({
       </div>
 
       <div className="binder-wrapper">
-        <div className="binder-rings">
-          <div className="ring"></div>
-          <div className="ring"></div>
-          <div className="ring"></div>
-          <div className="ring"></div>
-        </div>
-
         <div 
           className="scrapbook-page"
           onMouseMove={handleMouseMove}
@@ -335,14 +328,18 @@ const ScrapbookPage = ({
               <div className="scrapbook-collage jamboard-style">
                 {currentMemory.photos?.length > 0 ? (
                   <>
-                    {currentMemory.photos.map((photo, idx) => (
+                    {currentMemory.photos.map((photo, idx) => {
+                      // Deterministic rotation based on index to prevent vibrating
+                      const rotation = photo.rotation || ((idx % 2 === 0 ? 1 : -1) * ((idx * 7) % 5 - 2));
+                      
+                      return (
                       <div
                         key={idx}
                         className={`polaroid-jamboard ${draggingPhoto === idx ? 'dragging' : ''}`}
                         style={{
                           left: `${photo.position?.x || (idx * 15)}%`,
                           top: `${photo.position?.y || (idx * 12)}%`,
-                          transform: `rotate(${(idx % 2 === 0 ? 1 : -1) * (Math.random() * 4 - 2)}deg)`,
+                          transform: `rotate(${rotation}deg)`,
                           cursor: draggingPhoto === idx ? 'grabbing' : 'grab'
                         }}
                         onMouseDown={(e) => handleMouseDown(e, idx)}
@@ -375,7 +372,8 @@ const ScrapbookPage = ({
                           <div className="polaroid-outer-caption">{photo.outerCaption}</div>
                         )}
                       </div>
-                    ))}
+                    );
+                    })}
                   </>
                 ) : null}
 

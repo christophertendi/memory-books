@@ -101,30 +101,13 @@
 }
 
 .binder-rings {
-  position: relative;
-  width: 40px;
-  height: 700px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  align-items: center;
-  padding: 2rem 0;
-  z-index: 10;
-}
-
-.ring {
-  width: 24px;
-  height: 48px;
-  border: 3px solid #9ca3af;
-  border-radius: 50%;
-  background: linear-gradient(to right, #e5e7eb 50%, transparent 50%);
-  box-shadow: inset 2px 0 4px rgba(0, 0, 0, 0.2);
+  display: none; /* Hide binder rings */
 }
 
 /* Scrapbook Page */
 .scrapbook-page {
   flex: 1;
-  min-height: 700px;
+  min-height: 900px; /* Taller page for more photos */
   background: #f8f6f0;
   border: 1px solid #e5ddc8;
   box-shadow: 
@@ -275,17 +258,17 @@
 
 .drag-indicator {
   position: absolute;
-  bottom: 0.5rem;
+  bottom: 0.25rem;
   left: 50%;
-  transform: translateX(-50%);
-  color: rgba(0, 0, 0, 0.3);
+  transform: translateX(-50%) scale(0.6); /* Much smaller */
+  color: rgba(0, 0, 0, 0.4);
   opacity: 0;
   transition: opacity 0.2s ease;
   pointer-events: none;
 }
 
 .polaroid-photo:hover .drag-indicator {
-  opacity: 1;
+  opacity: 0.8; /* Slightly less visible to avoid overlap issues */
 }
 
 .add-photo-hint {
@@ -407,27 +390,27 @@
 }
 
 .page-btn {
-  background: white;
-  border: 1px solid var(--border);
+  background: transparent;
+  border: 1px solid rgba(156, 163, 175, 0.3);
   color: var(--text);
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
 }
 
 .page-btn:hover:not(:disabled) {
-  border-color: var(--accent);
-  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(156, 163, 175, 0.5);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .page-btn:disabled {
-  opacity: 0.3;
+  opacity: 0.2;
   cursor: not-allowed;
 }
 
@@ -539,10 +522,10 @@
 
 .page-btn {
   background: transparent;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(156, 163, 175, 0.3);
   color: var(--text);
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -552,12 +535,12 @@
 }
 
 .page-btn:hover:not(:disabled) {
-  border-color: var(--accent);
-  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(156, 163, 175, 0.5);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .page-btn:disabled {
-  opacity: 0.3;
+  opacity: 0.2;
   cursor: not-allowed;
 }
 
@@ -817,19 +800,6 @@
     gap: 1rem;
   }
 
-  .binder-rings {
-    width: 100%;
-    height: 40px;
-    flex-direction: row;
-    padding: 0 2rem;
-  }
-
-  .ring {
-    width: 32px;
-    height: 20px;
-    background: linear-gradient(to bottom, #e5e7eb 50%, transparent 50%);
-  }
-
   .scrapbook-page {
     min-height: 600px;
     padding: 2rem 1.5rem;
@@ -947,10 +917,20 @@
     bottom: 1rem; /* Move controls closer to bottom on mobile */
   }
 
+  /* Make scrapbook page taller on mobile for more photos */
+  .scrapbook-page {
+    min-height: 120vh; /* Taller page on mobile */
+    max-height: none;
+  }
+
+  .book-view {
+    overflow-y: auto; /* Allow scrolling */
+  }
+
   /* Make navigation buttons smaller on mobile */
   .page-btn {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
   }
 
   .action-btn {
@@ -969,10 +949,9 @@
     gap: 1rem;
   }
 
-  /* Move external controls to top left on mobile */
+  /* Keep external controls at bottom left on mobile too */
   .external-controls {
-    bottom: auto;
-    top: 1rem;
+    bottom: 2rem;
     left: 1rem;
     right: auto;
   }
@@ -1042,14 +1021,15 @@
     border-color: #dc2626;
   }
 
-  /* Make drag indicator more prominent on mobile */
+  /* Make drag indicator smaller on mobile */
   .drag-indicator {
-    opacity: 1;
-    background: rgba(0, 0, 0, 0.6);
+    opacity: 0.9;
+    background: rgba(0, 0, 0, 0.5);
     color: white;
-    padding: 0.5rem;
-    border-radius: 4px;
-    bottom: 0.25rem;
+    padding: 0.25rem;
+    border-radius: 3px;
+    bottom: 0.2rem;
+    transform: translateX(-50%) scale(0.5); /* Much smaller on mobile */
   }
 
   /* Increase touch target for polaroids */
