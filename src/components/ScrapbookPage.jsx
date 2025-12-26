@@ -201,20 +201,6 @@ const ScrapbookPage = ({
         >
           {hasMemories ? (
             <div className="page-content">
-              <div className="page-category-badge">
-                {currentMemory.category ? (
-                  <span className="category-tag" onClick={() => setShowCategoryModal(true)}>
-                    <Tag size={14} />
-                    {currentMemory.category}
-                  </span>
-                ) : (
-                  <button className="assign-category" onClick={() => setShowCategoryModal(true)}>
-                    <Tag size={14} />
-                    Assign Category
-                  </button>
-                )}
-              </div>
-
               <div className="scrapbook-collage jamboard-style">
                 {currentMemory.photos?.length > 0 ? (
                   <>
@@ -270,12 +256,22 @@ const ScrapbookPage = ({
               </div>
 
               <div className="page-controls">
-                <button className="filter-btn" onClick={() => setShowFilterMenu(true)}>
-                  <Filter size={20} />
-                  {selectedFilters.length > 0 && (
-                    <span className="filter-count">{selectedFilters.length}</span>
-                  )}
-                </button>
+                <div className="left-controls">
+                  <button className="filter-btn" onClick={() => setShowFilterMenu(true)}>
+                    <Filter size={20} />
+                    {selectedFilters.length > 0 && (
+                      <span className="filter-count">{selectedFilters.length}</span>
+                    )}
+                  </button>
+
+                  <button 
+                    className={`category-assign-btn ${currentMemory.category ? 'has-category' : ''}`}
+                    onClick={() => setShowCategoryModal(true)}
+                  >
+                    <Tag size={16} />
+                    {currentMemory.category || 'Category'}
+                  </button>
+                </div>
 
                 <div className="nav-controls">
                   <button
@@ -358,6 +354,13 @@ const ScrapbookPage = ({
             </button>
             <h3 className="modal-title">Assign Category to Page</h3>
             
+            {currentMemory.category && (
+              <div className="current-category-display">
+                <span className="current-label">Current:</span>
+                <span className="current-category">{currentMemory.category}</span>
+              </div>
+            )}
+
             {currentBook.categories?.length > 0 && (
               <div className="category-list">
                 {currentBook.categories.map((category) => (
@@ -366,6 +369,7 @@ const ScrapbookPage = ({
                     className={`category-option ${currentMemory.category === category.name ? 'selected' : ''}`}
                     onClick={() => assignCategory(category.name)}
                   >
+                    {currentMemory.category === category.name && <span className="check-icon">✓</span>}
                     {category.name}
                   </button>
                 ))}
