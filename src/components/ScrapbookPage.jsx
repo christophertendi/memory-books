@@ -201,6 +201,14 @@ const ScrapbookPage = ({
         >
           {hasMemories ? (
             <div className="page-content">
+              <button 
+                className="category-btn-topleft"
+                onClick={() => setShowCategoryModal(true)}
+              >
+                <Tag size={16} />
+                {currentMemory.category || 'Assign Category'}
+              </button>
+
               <div className="scrapbook-collage jamboard-style">
                 {currentMemory.photos?.length > 0 ? (
                   <>
@@ -255,25 +263,15 @@ const ScrapbookPage = ({
                 )}
               </div>
 
-              <div className="page-controls">
-                <div className="left-controls">
-                  <button className="filter-btn" onClick={() => setShowFilterMenu(true)}>
-                    <Filter size={20} />
-                    {selectedFilters.length > 0 && (
-                      <span className="filter-count">{selectedFilters.length}</span>
-                    )}
-                  </button>
+              <div className="page-controls-bottom">
+                <button className="filter-btn-bottom" onClick={() => setShowFilterMenu(true)}>
+                  <Filter size={20} />
+                  {selectedFilters.length > 0 && (
+                    <span className="filter-count">{selectedFilters.length}</span>
+                  )}
+                </button>
 
-                  <button 
-                    className={`category-assign-btn ${currentMemory.category ? 'has-category' : ''}`}
-                    onClick={() => setShowCategoryModal(true)}
-                  >
-                    <Tag size={16} />
-                    {currentMemory.category || 'Category'}
-                  </button>
-                </div>
-
-                <div className="nav-controls">
+                <div className="center-nav-controls">
                   <button
                     className="page-btn"
                     onClick={() => selectedFilters.length > 0 ? navigateFiltered(-1) : onPageChange(Math.max(0, currentPage - 1))}

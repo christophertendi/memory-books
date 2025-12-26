@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Plus, X } from 'lucide-react';
+import Auth from './components/Auth.jsx';
 import BookLibrary from './components/BookLibrary.jsx';
 import ScrapbookPage from './components/ScrapbookPage.jsx';
 import BookCoverDesigner from './components/BookCoverDesigner.jsx';
 import './App.css';
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [books, setBooks] = useState([]);
   const [currentBook, setCurrentBook] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -27,17 +30,30 @@ function App() {
     outerCaption: '',
   });
 
+  // Check authentication on mount
   useEffect(() => {
-    const savedBooks = localStorage.getItem('memoryBooks');
-    if (savedBooks) {
-      setBooks(JSON.parse(savedBooks));
+    const user = localStorage.getItem('currentUser');
+    if (user) {
+      setCurrentUser(user);
+      setIsAuthenticated(true);
     }
   }, []);
 
+  // Load user-specific books
   useEffect(() => {
-    if (books.length > 0) {
+    if (isAuthenticated && currentUser) {
+      const savedBooks = localStorage.getItem(`memoryBooks_${currentUser}`);
+      if (savedBooks) {
+        setBooks(JSON.parse(savedBooks));
+      }
+    }
+  }, [isAuthenticated, currentUser]);
+
+  // Save user-specific books
+  useEffect(() => {
+    if (isAuthenticated && currentUser && books.length > 0) {
       try {
-        localStorage.setItem('memoryBooks', JSON.stringify(books));
+        localStorage.setItem(`memoryBooks_${currentUser}`, JSON.stringify(books));
       } catch (e) {
         if (e.name === 'QuotaExceededError') {
           alert('Storage limit reached! Please use smaller images or delete some books. Images are automatically compressed to 800px max and 70% quality.');
@@ -47,7 +63,24 @@ function App() {
         }
       }
     }
-  }, [books]);
+  }, [books, isAuthenticated, currentUser]);
+
+  const handleAuthSuccess = (email) => {
+    setCurrentUser(email);
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('currentUser');
+    setCurrentUser(null);
+    setIsAuthenticated(false);
+    setBooks([]);
+    setCurrentBook(null);
+  };
+
+  if (!isAuthenticated) {
+    return <Auth onAuthSuccess={handleAuthSuccess} />;
+  }
 
   const handleCreateBook = (e) => {
     e.preventDefault();
