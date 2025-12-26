@@ -1,4 +1,5 @@
-import { ChevronLeft, ChevronRight, Trash2, Plus, X, Edit2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trash2, Plus, X, Edit2, Move } from 'lucide-react';
+import { useState } from 'react';
 import './ScrapbookPage.css';
 
 const ScrapbookPage = ({
@@ -16,8 +17,80 @@ const ScrapbookPage = ({
   setBooks,
   setCurrentBook
 }) => {
+  const [draggingPhoto, setDraggingPhoto] = useState(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [editingPhotoCaption, setEditingPhotoCaption] = useState(null);
+
   const currentMemory = currentBook.memories[currentPage];
   const hasMemories = currentBook.memories.length > 0;
+
+  const handleMouseDown = (e, photoIndex) => {
+    if (e.target.closest('.photo-action-btn')) return;
+    
+    const photo = currentMemory.photos[photoIndex];
+    const rect = e.currentTarget.getBoundingClientRect();
+    
+    setDraggingPhoto(photoIndex);
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
+
+  const handleMouseMove = (e) => {
+    if (draggingPhoto === null) return;
+    
+    const container = document.querySelector('.scrapbook-collage');
+    const rect = container.getBoundingClientRect();
+    
+    const x = ((e.clientX - rect.left - dragOffset.x) / rect.width) * 100;
+    const y = ((e.clientY - rect.top - dragOffset.y) / rect.height) * 100;
+    
+    const updatedBooks = books.map((book) => {
+      if (book.id === currentBook.id) {
+        const newMemories = [...book.memories];
+        newMemories[currentPage].photos[draggingPhoto] = {
+          ...newMemories[currentPage].photos[draggingPhoto],
+          position: {
+            x: Math.max(0, Math.min(80, x)),
+            y: Math.max(0, Math.min(80, y))
+          }
+        };
+        return { ...book, memories: newMemories };
+      }
+      return book;
+    });
+    
+    setBooks(updatedBooks);
+    setCurrentBook(updatedBooks.find((b) => b.id === currentBook.id));
+  };
+
+  const handleMouseUp = () => {
+    setDraggingPhoto(null);
+  };
+
+  const handleEditCaption = (photoIndex) => {
+    setEditingPhotoCaption(photoIndex);
+  };
+
+  const handleSaveCaption = (photoIndex, newInnerCaption, newOuterCaption) => {
+    const updatedBooks = books.map((book) => {
+      if (book.id === currentBook.id) {
+        const newMemories = [...book.memories];
+        newMemories[currentPage].photos[photoIndex] = {
+          ...newMemories[currentPage].photos[photoIndex],
+          innerCaption: newInnerCaption,
+          outerCaption: newOuterCaption
+        };
+        return { ...book, memories: newMemories };
+      }
+      return book;
+    });
+    
+    setBooks(updatedBooks);
+    setCurrentBook(updatedBooks.find((b) => b.id === currentBook.id));
+    setEditingPhotoCaption(null);
+  };
 
   return (
     <div className="book-view">
@@ -65,46 +138,70 @@ const ScrapbookPage = ({
           <div className="ring"></div>
         </div>
 
-        <div className="scrapbook-page">
+        <div 
+          className="scrapbook-page"
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        >
           {hasMemories ? (
             <div className="page-content">
-              <div className="scrapbook-collage">
+              <div className="scrapbook-collage jamboard-style">
                 {currentMemory.photos && currentMemory.photos.length > 0 ? (
-                  <div className="photos-grid">
+                  <>
                     {currentMemory.photos.map((photo, idx) => (
-                      <div key={idx} className="polaroid-wrapper">
-                        <div
-                          className="polaroid-photo"
-                          style={{
-                            transform: `rotate(${(idx % 2 === 0 ? 1 : -1) * (Math.random() * 4 - 2)}deg)`,
-                          }}
-                        >
+                      <div
+                        key={idx}
+                        className={`polaroid-jamboard ${draggingPhoto === idx ? 'dragging' : ''}`}
+                        style={{
+                          left: `${photo.position?.x || (idx * 15)}%`,
+                          top: `${photo.position?.y || (idx * 12)}%`,
+                          transform: `rotate(${(idx % 2 === 0 ? 1 : -1) * (Math.random() * 4 - 2)}deg)`,
+                          cursor: draggingPhoto === idx ? 'grabbing' : 'grab'
+                        }}
+                        onMouseDown={(e) => handleMouseDown(e, idx)}
+                      >
+                        <div className="polaroid-photo">
                           <div className="polaroid-image">
                             <img src={photo.image} alt={photo.innerCaption} />
                           </div>
                           {photo.innerCaption && (
                             <div className="polaroid-inner-caption">{photo.innerCaption}</div>
                           )}
-                          <button
-                            className="photo-delete"
-                            onClick={() => onDeletePhoto(currentPage, idx)}
-                          >
-                            <X size={14} />
-                          </button>
+                          <div className="photo-actions">
+                            <button
+                              className="photo-action-btn edit"
+                              onClick={() => handleEditCaption(idx)}
+                              title="Edit captions"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button
+                              className="photo-action-btn delete"
+                              onClick={() => onDeletePhoto(currentPage, idx)}
+                              title="Delete photo"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                          <div className="drag-indicator">
+                            <Move size={16} />
+                          </div>
                         </div>
                         {photo.outerCaption && (
                           <div className="polaroid-outer-caption">{photo.outerCaption}</div>
                         )}
                       </div>
                     ))}
-                    {currentMemory.photos.length < 5 && (
-                      <button className="add-photo-slot" onClick={() => onAddPhoto(currentPage)}>
-                        <Plus size={32} />
-                        <span>Add Photo</span>
-                      </button>
-                    )}
-                  </div>
+                  </>
                 ) : null}
+
+                {(!currentMemory.photos || currentMemory.photos.length < 5) && (
+                  <div className="add-photo-hint">
+                    <p>Click the + button to add photos</p>
+                    <p className="hint-subtext">Drag photos to reposition them</p>
+                  </div>
+                )}
               </div>
 
               <div className="page-controls">
@@ -192,6 +289,51 @@ const ScrapbookPage = ({
           </button>
         </div>
       </div>
+
+      {editingPhotoCaption !== null && (
+        <div className="modal-overlay" onClick={() => setEditingPhotoCaption(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setEditingPhotoCaption(null)}>
+              <X size={24} />
+            </button>
+            <h3 className="modal-title">Edit Captions</h3>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                handleSaveCaption(
+                  editingPhotoCaption,
+                  formData.get('innerCaption'),
+                  formData.get('outerCaption')
+                );
+              }}
+              className="memory-form"
+            >
+              <div className="form-group">
+                <label>Caption (inside polaroid)</label>
+                <input
+                  type="text"
+                  name="innerCaption"
+                  defaultValue={currentMemory.photos[editingPhotoCaption].innerCaption}
+                  placeholder="Short caption inside the photo..."
+                />
+              </div>
+              <div className="form-group">
+                <label>Caption (outside polaroid)</label>
+                <textarea
+                  name="outerCaption"
+                  defaultValue={currentMemory.photos[editingPhotoCaption].outerCaption}
+                  placeholder="Additional notes beside the photo..."
+                  rows="3"
+                />
+              </div>
+              <button type="submit" className="btn-submit">
+                Save Captions
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

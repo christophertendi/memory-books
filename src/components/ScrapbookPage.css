@@ -139,7 +139,7 @@
   position: relative;
 }
 
-/* Scrapbook Collage */
+/* Scrapbook Collage - Jamboard Style */
 .scrapbook-collage {
   position: relative;
   width: 100%;
@@ -152,18 +152,26 @@
       rgba(0, 0, 0, 0.02) 24px,
       rgba(0, 0, 0, 0.02) 25px
     );
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.photos-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.25rem;
-  width: 100%;
-  padding: 1.5rem;
-  align-items: start;
+.jamboard-style {
+  position: relative;
+  user-select: none;
+}
+
+.polaroid-jamboard {
+  position: absolute;
+  z-index: 1;
+  transition: box-shadow 0.2s ease;
+}
+
+.polaroid-jamboard.dragging {
+  z-index: 100;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.polaroid-jamboard:hover {
+  z-index: 10;
 }
 
 .polaroid-wrapper {
@@ -182,10 +190,11 @@
   transform-origin: center;
   position: relative;
   transition: transform 0.3s ease;
+  width: 200px;
 }
 
 .polaroid-photo:hover {
-  transform: scale(1.05) rotate(0deg) !important;
+  transform: scale(1.02) rotate(0deg) !important;
   z-index: 10;
 }
 
@@ -219,35 +228,84 @@
   font-size: 0.8rem;
   line-height: 1.4;
   color: var(--text);
-  padding: 0 0.25rem;
+  padding: 0.5rem;
   font-style: italic;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  max-width: 200px;
 }
 
-.photo-delete {
+.photo-actions {
   position: absolute;
   top: 0.4rem;
   right: 0.4rem;
-  background: rgba(0, 0, 0, 0.7);
-  border: none;
-  color: white;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  gap: 0.35rem;
   opacity: 0;
   transition: opacity 0.2s ease;
   z-index: 10;
 }
 
-.polaroid-photo:hover .photo-delete {
+.polaroid-photo:hover .photo-actions {
   opacity: 1;
 }
 
-.photo-delete:hover {
+.photo-action-btn {
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.photo-action-btn.edit:hover {
+  background: #3b82f6;
+}
+
+.photo-action-btn.delete:hover {
   background: #dc2626;
+}
+
+.drag-indicator {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.polaroid-photo:hover .drag-indicator {
+  opacity: 1;
+}
+
+.add-photo-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: var(--text-tertiary);
+  font-family: 'Playfair Display', serif;
+}
+
+.add-photo-hint p {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.hint-subtext {
+  font-size: 0.9rem;
+  opacity: 0.7;
 }
 
 .add-photo-slot {
@@ -473,10 +531,25 @@
     height: 480px;
   }
 
-  .photos-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-    padding: 1rem;
+  .polaroid-photo {
+    width: 160px;
+  }
+
+  .polaroid-outer-caption {
+    max-width: 160px;
+    font-size: 0.75rem;
+  }
+
+  .photo-actions {
+    opacity: 1;
+  }
+
+  .add-photo-hint p {
+    font-size: 1rem;
+  }
+
+  .hint-subtext {
+    font-size: 0.85rem;
   }
 
   .divider-tabs {
