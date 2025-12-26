@@ -33,19 +33,43 @@ const ScrapbookPage = ({
       return currentBook.memories.map((_, idx) => idx);
     }
     
-    return currentBook.memories
+    console.log('🔍 Filtering pages...');
+    console.log('Selected filters:', selectedFilters);
+    console.log('All pages with categories:', currentBook.memories.map((m, i) => ({ 
+      index: i, 
+      category: m.category 
+    })));
+    
+    const filtered = currentBook.memories
       .map((memory, idx) => ({ ...memory, originalIndex: idx }))
-      .filter(memory => selectedFilters.includes(memory.category))
+      .filter(memory => {
+        const match = selectedFilters.includes(memory.category);
+        console.log(`Page ${memory.originalIndex}: category="${memory.category}" matches filter? ${match}`);
+        return match;
+      })
       .sort((a, b) => {
         const orderA = currentBook.categories?.findIndex(cat => cat.name === a.category) ?? 999;
         const orderB = currentBook.categories?.findIndex(cat => cat.name === b.category) ?? 999;
         return orderA - orderB;
       })
       .map(memory => memory.originalIndex);
+    
+    console.log('Filtered page indices:', filtered);
+    return filtered;
   }, [selectedFilters, currentBook.memories, currentBook.categories]);
 
   const currentFilteredIndex = filteredPages.indexOf(currentPage);
   const totalFilteredPages = filteredPages.length;
+
+  // Auto-navigate to first filtered page when filters are applied
+  useEffect(() => {
+    if (selectedFilters.length > 0 && filteredPages.length > 0) {
+      // If current page is not in filtered results, go to first filtered page
+      if (!filteredPages.includes(currentPage)) {
+        onPageChange(filteredPages[0]);
+      }
+    }
+  }, [selectedFilters, filteredPages, currentPage, onPageChange]);
 
   const handleMouseDown = (e, photoIndex) => {
     if (e.target.closest('.photo-action-btn') || e.target.closest('.polaroid-image')) return;
@@ -118,9 +142,23 @@ const ScrapbookPage = ({
   const assignCategory = (categoryName) => {
     const updatedBooks = books.map((book) => {
       if (book.id === currentBook.id) {
+        // Ensure category exists in book's category list
+        const currentCategories = book.categories || [];
+        const categoryExists = currentCategories.some(cat => cat.name === categoryName);
+        
+        const updatedCategories = categoryExists 
+          ? currentCategories 
+          : [...currentCategories, { name: categoryName, color: '#6b7280' }];
+        
+        // Assign category to current page
         const newMemories = [...book.memories];
         newMemories[currentPage] = { ...newMemories[currentPage], category: categoryName };
-        return { ...book, memories: newMemories };
+        
+        return { 
+          ...book, 
+          categories: updatedCategories,
+          memories: newMemories 
+        };
       }
       return book;
     });
@@ -311,7 +349,11 @@ const ScrapbookPage = ({
             <button
               className="page-btn"
               onClick={() => selectedFilters.length > 0 ? navigateFiltered(-1) : onPageChange(Math.max(0, currentPage - 1))}
-              disabled={selectedFilters.length > 0 ? currentFilteredIndex === 0 : currentPage === 0}
+              disabled={
+                selectedFilters.length > 0 
+                  ? (currentFilteredIndex <= 0 || totalFilteredPages <= 1)
+                  : currentPage === 0
+              }
             >
               <ChevronLeft size={24} />
             </button>
@@ -323,7 +365,11 @@ const ScrapbookPage = ({
             <button
               className="page-btn"
               onClick={() => selectedFilters.length > 0 ? navigateFiltered(1) : onPageChange(Math.min(currentBook.memories.length - 1, currentPage + 1))}
-              disabled={selectedFilters.length > 0 ? currentFilteredIndex === totalFilteredPages - 1 : currentPage === currentBook.memories.length - 1}
+              disabled={
+                selectedFilters.length > 0 
+                  ? (currentFilteredIndex >= totalFilteredPages - 1 || totalFilteredPages <= 1)
+                  : currentPage === currentBook.memories.length - 1
+              }
             >
               <ChevronRight size={24} />
             </button>
@@ -377,10 +423,20 @@ const ScrapbookPage = ({
             )}
 
             <div className="filter-actions">
-              <button className="btn-secondary" onClick={() => setSelectedFilters([])}>
+              <button className="btn-secondary" onClick={() => {
+                setSelectedFilters([]);
+              }}>
                 Clear Filters
               </button>
-              <button className="btn-submit" onClick={() => setShowFilterMenu(false)}>
+              <button className="btn-submit" onClick={() => {
+                // Navigate to first filtered page if current page not in filter
+                if (selectedFilters.length > 0 && filteredPages.length > 0) {
+                  if (!filteredPages.includes(currentPage)) {
+                    onPageChange(filteredPages[0]);
+                  }
+                }
+                setShowFilterMenu(false);
+              }}>
                 Apply
               </button>
             </div>
