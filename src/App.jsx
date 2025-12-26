@@ -36,7 +36,16 @@ function App() {
 
   useEffect(() => {
     if (books.length > 0) {
-      localStorage.setItem('memoryBooks', JSON.stringify(books));
+      try {
+        localStorage.setItem('memoryBooks', JSON.stringify(books));
+      } catch (e) {
+        if (e.name === 'QuotaExceededError') {
+          alert('Storage limit reached! Please use smaller images or delete some books. Images are automatically compressed to 800px max and 70% quality.');
+          console.error('LocalStorage quota exceeded:', e);
+        } else {
+          console.error('Error saving to localStorage:', e);
+        }
+      }
     }
   }, [books]);
 
@@ -235,10 +244,49 @@ function App() {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Create an image to compress it
+      const img = new Image();
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setMemoryForm({ ...memoryForm, image: reader.result });
+      
+      reader.onload = (event) => {
+        img.src = event.target.result;
+        
+        img.onload = () => {
+          // Create canvas to compress image
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Set max dimensions
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+          
+          // Calculate new dimensions
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          // Draw and compress
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Convert to base64 with compression (0.7 quality)
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          setMemoryForm({ ...memoryForm, image: compressedBase64 });
+        };
       };
+      
       reader.readAsDataURL(file);
     }
   };

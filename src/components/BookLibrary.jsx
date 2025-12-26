@@ -84,7 +84,6 @@ const BookLibrary = ({ books, onOpenBook, onEditBook, onDeleteBook, onCreateBook
               className="book-spine-side"
               style={getCoverStyle(book)}
             >
-              <span style={{ color: getTextColor(book) }}>{book.name}</span>
             </div>
             <div className="book-actions-overlay">
               <button 
