@@ -785,6 +785,14 @@ body {
   font-weight: 500;
   margin-bottom: 1.5rem;
   letter-spacing: -0.01em;
+  padding-right: 2rem; /* Add padding to prevent overlap with close button */
+}
+
+@media (max-width: 768px) {
+  .modal-title {
+    font-size: 1.25rem;
+    padding-right: 2.5rem;
+  }
 }
 
 .book-form,

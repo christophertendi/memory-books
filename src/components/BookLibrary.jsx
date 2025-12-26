@@ -4,6 +4,8 @@ import './BookLibrary.css';
 
 const BookLibrary = ({ books, onOpenBook, onEditBook, onDeleteBook, onCreateBook, onDesignCover, onLogout, hideMenu }) => {
   const [showSidebar, setShowSidebar] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null);
   const getCoverStyle = (book) => {
     if (!book.coverDesign) {
       return { backgroundColor: book.color };
@@ -118,8 +120,9 @@ const BookLibrary = ({ books, onOpenBook, onEditBook, onDeleteBook, onCreateBook
             >
             </div>
             <div className="book-actions-overlay">
+              {/* Desktop buttons */}
               <button 
-                className="book-action-btn" 
+                className="book-action-btn desktop-only" 
                 onClick={(e) => {
                   e.stopPropagation();
                   onDesignCover(book);
@@ -129,7 +132,7 @@ const BookLibrary = ({ books, onOpenBook, onEditBook, onDeleteBook, onCreateBook
                 <Palette size={16} />
               </button>
               <button 
-                className="book-action-btn" 
+                className="book-action-btn desktop-only" 
                 onClick={(e) => {
                   e.stopPropagation();
                   onEditBook(book);
@@ -139,7 +142,7 @@ const BookLibrary = ({ books, onOpenBook, onEditBook, onDeleteBook, onCreateBook
                 <Edit2 size={16} />
               </button>
               <button 
-                className="book-action-btn" 
+                className="book-action-btn desktop-only" 
                 onClick={(e) => {
                   e.stopPropagation();
                   onDeleteBook(book.id);
@@ -147,6 +150,19 @@ const BookLibrary = ({ books, onOpenBook, onEditBook, onDeleteBook, onCreateBook
                 title="Delete Book"
               >
                 <Trash2 size={16} />
+              </button>
+
+              {/* Mobile-only Edit button */}
+              <button 
+                className="book-action-btn mobile-edit-book-btn" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedBook(book);
+                  setShowEditModal(true);
+                }}
+                title="Edit"
+              >
+                <Edit2 size={18} />
               </button>
             </div>
           </div>
@@ -157,6 +173,55 @@ const BookLibrary = ({ books, onOpenBook, onEditBook, onDeleteBook, onCreateBook
         <Plus size={20} />
         <span>New Book</span>
       </button>
+
+      {/* Edit Modal - Mobile Only */}
+      {showEditModal && selectedBook && (
+        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="modal edit-options-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowEditModal(false)}>
+              <X size={24} />
+            </button>
+            <h3 className="modal-title">Edit Book</h3>
+            
+            <div className="edit-options">
+              <button 
+                className="edit-option-btn"
+                onClick={() => {
+                  setShowEditModal(false);
+                  onEditBook(selectedBook);
+                }}
+              >
+                <Edit2 size={20} />
+                Edit Book Title
+              </button>
+
+              <button 
+                className="edit-option-btn"
+                onClick={() => {
+                  setShowEditModal(false);
+                  onDesignCover(selectedBook);
+                }}
+              >
+                <Palette size={20} />
+                Edit Book Cover
+              </button>
+
+              <button 
+                className="edit-option-btn delete"
+                onClick={() => {
+                  if (window.confirm('Delete this entire book? All pages will be lost.')) {
+                    setShowEditModal(false);
+                    onDeleteBook(selectedBook.id);
+                  }
+                }}
+              >
+                <Trash2 size={20} />
+                Delete Book
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

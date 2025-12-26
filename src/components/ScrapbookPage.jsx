@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Trash2, Plus, X, Edit2, Move, Filter, Tag } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trash2, Plus, X, Edit2, Move, Filter, Tag, Palette } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import './ScrapbookPage.css';
 
@@ -14,7 +14,9 @@ const ScrapbookPage = ({
   books,
   setBooks,
   setCurrentBook,
-  onFilterChange // Callback to notify parent of filter changes
+  onFilterChange, // Callback to notify parent of filter changes
+  onDesignCover, // Callback to open cover designer
+  onDeleteBook // Callback to delete the book
 }) => {
   const [draggingPhoto, setDraggingPhoto] = useState(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -24,6 +26,7 @@ const ScrapbookPage = ({
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const currentMemory = currentBook.memories[currentPage];
   const hasMemories = currentBook.memories.length > 0;
@@ -99,7 +102,7 @@ const ScrapbookPage = ({
         const newMemories = [...book.memories];
         newMemories[currentPage].photos[draggingPhoto] = {
           ...newMemories[currentPage].photos[draggingPhoto],
-          position: { x: Math.max(-5, Math.min(70, x)), y: Math.max(-5, Math.min(75, y)) }
+          position: { x: Math.max(-5, Math.min(65, x)), y: Math.max(-5, Math.min(70, y)) }
         };
         return { ...book, memories: newMemories };
       }
@@ -123,7 +126,7 @@ const ScrapbookPage = ({
         const newMemories = [...book.memories];
         newMemories[currentPage].photos[draggingPhoto] = {
           ...newMemories[currentPage].photos[draggingPhoto],
-          position: { x: Math.max(-5, Math.min(70, x)), y: Math.max(-5, Math.min(75, y)) }
+          position: { x: Math.max(-5, Math.min(65, x)), y: Math.max(-5, Math.min(70, y)) }
         };
         return { ...book, memories: newMemories };
       }
@@ -322,6 +325,11 @@ const ScrapbookPage = ({
             </h1>
           )}
         </div>
+
+        {/* Mobile Edit Button */}
+        <button className="mobile-edit-btn" onClick={() => setShowEditModal(true)}>
+          Edit
+        </button>
 
         <div className="right-counter">
           <span className="page-counter">
@@ -611,6 +619,55 @@ const ScrapbookPage = ({
               </div>
               <button type="submit" className="btn-submit">Save Captions</button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal - Mobile Only */}
+      {showEditModal && (
+        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="modal edit-options-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowEditModal(false)}>
+              <X size={24} />
+            </button>
+            <h3 className="modal-title">Edit Book</h3>
+            
+            <div className="edit-options">
+              <button 
+                className="edit-option-btn"
+                onClick={() => {
+                  setEditingTitle(true);
+                  setShowEditModal(false);
+                }}
+              >
+                <Edit2 size={20} />
+                Edit Book Title
+              </button>
+
+              <button 
+                className="edit-option-btn"
+                onClick={() => {
+                  setShowEditModal(false);
+                  if (onDesignCover) onDesignCover(currentBook);
+                }}
+              >
+                <Palette size={20} />
+                Edit Book Cover
+              </button>
+
+              <button 
+                className="edit-option-btn delete"
+                onClick={() => {
+                  if (window.confirm('Delete this entire book? All pages will be lost.')) {
+                    setShowEditModal(false);
+                    if (onDeleteBook) onDeleteBook(currentBook.id);
+                  }
+                }}
+              >
+                <Trash2 size={20} />
+                Delete Book
+              </button>
+            </div>
           </div>
         </div>
       )}

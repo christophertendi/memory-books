@@ -196,6 +196,15 @@
   transform: scale(1.1);
 }
 
+/* Hide mobile edit button on desktop, show desktop buttons */
+.mobile-edit-book-btn {
+  display: none;
+}
+
+.desktop-only {
+  display: flex;
+}
+
 /* Add Book Button */
 .add-book-btn-fixed {
   position: fixed;
@@ -310,6 +319,26 @@
     padding: 0.75rem 1.25rem;
     font-size: 0.9rem;
   }
+
+  /* Make book action buttons always visible on mobile */
+  .book-actions-overlay {
+    opacity: 1 !important;
+    background: rgba(0, 0, 0, 0.6);
+  }
+
+  .book-action-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Hide desktop buttons, show mobile edit button */
+  .desktop-only {
+    display: none !important;
+  }
+
+  .mobile-edit-book-btn {
+    display: flex !important;
+  }
 }
 
 .library-header {
@@ -423,4 +452,96 @@
   border-color: #dc2626;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+}
+
+/* Edit Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 1rem;
+}
+
+.modal {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text);
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.01em;
+  padding-right: 2rem;
+  font-family: 'Playfair Display', serif;
+}
+
+.edit-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.edit-option-btn {
+  background: white;
+  border: 2px solid var(--border);
+  color: var(--text);
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.edit-option-btn:hover {
+  border-color: var(--accent);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.edit-option-btn.delete {
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+.edit-option-btn.delete:hover {
+  border-color: #dc2626;
+  background: #fee2e2;
 }

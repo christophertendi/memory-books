@@ -435,6 +435,8 @@ function App() {
           setBooks={setBooks}
           setCurrentBook={setCurrentBook}
           onFilterChange={setActiveFilters}
+          onDesignCover={handleDesignCover}
+          onDeleteBook={handleDeleteBook}
         />
 
         {/* Only show floating menu if on a valid page and book isn't full */}
