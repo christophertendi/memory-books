@@ -1,7 +1,50 @@
-import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Palette } from 'lucide-react';
 import './BookLibrary.css';
 
-const BookLibrary = ({ books, onOpenBook, onEditBook, onDeleteBook, onCreateBook }) => {
+const BookLibrary = ({ books, onOpenBook, onEditBook, onDeleteBook, onCreateBook, onDesignCover }) => {
+  const getCoverStyle = (book) => {
+    if (!book.coverDesign) {
+      return { backgroundColor: book.color };
+    }
+
+    const { backgroundColor, pattern } = book.coverDesign;
+    
+    switch (pattern) {
+      case 'gradient':
+        return {
+          background: `linear-gradient(135deg, ${backgroundColor}, color-mix(in srgb, ${backgroundColor}, black 30%))`
+        };
+      case 'dots':
+        return {
+          backgroundColor,
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px)',
+          backgroundSize: '20px 20px'
+        };
+      case 'stripes':
+        return {
+          backgroundColor,
+          backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px)'
+        };
+      case 'grid':
+        return {
+          backgroundColor,
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+          backgroundSize: '20px 20px'
+        };
+      case 'diagonal':
+        return {
+          backgroundColor,
+          backgroundImage: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 10px, transparent 10px, transparent 20px)'
+        };
+      default:
+        return { backgroundColor };
+    }
+  };
+
+  const getTextColor = (book) => {
+    return book.coverDesign?.textColor || '#ffffff';
+  };
+
   return (
     <div className="library-view">
       <div className="library-header">
@@ -22,24 +65,45 @@ const BookLibrary = ({ books, onOpenBook, onEditBook, onDeleteBook, onCreateBook
           >
             <div 
               className="book-front"
-              style={{ backgroundColor: book.color }}
+              style={getCoverStyle(book)}
             >
-              <div className="book-title-cover">{book.name}</div>
-              <div className="book-page-count">{book.memories.length}/10 pages</div>
+              <div 
+                className="book-title-cover"
+                style={{ color: getTextColor(book) }}
+              >
+                {book.name}
+              </div>
+              <div 
+                className="book-page-count"
+                style={{ color: getTextColor(book) }}
+              >
+                {book.memories.length}/10 pages
+              </div>
             </div>
             <div 
               className="book-spine-side"
-              style={{ backgroundColor: book.color }}
+              style={getCoverStyle(book)}
             >
-              <span>{book.name}</span>
+              <span style={{ color: getTextColor(book) }}>{book.name}</span>
             </div>
             <div className="book-actions-overlay">
               <button 
                 className="book-action-btn" 
                 onClick={(e) => {
                   e.stopPropagation();
+                  onDesignCover(book);
+                }}
+                title="Design Cover"
+              >
+                <Palette size={16} />
+              </button>
+              <button 
+                className="book-action-btn" 
+                onClick={(e) => {
+                  e.stopPropagation();
                   onEditBook(book);
                 }}
+                title="Edit Book"
               >
                 <Edit2 size={16} />
               </button>
@@ -49,6 +113,7 @@ const BookLibrary = ({ books, onOpenBook, onEditBook, onDeleteBook, onCreateBook
                   e.stopPropagation();
                   onDeleteBook(book.id);
                 }}
+                title="Delete Book"
               >
                 <Trash2 size={16} />
               </button>

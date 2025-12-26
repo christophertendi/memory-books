@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, X } from 'lucide-react';
 import BookLibrary from './components/BookLibrary.jsx';
 import ScrapbookPage from './components/ScrapbookPage.jsx';
+import BookCoverDesigner from './components/BookCoverDesigner.jsx';
 import './App.css';
 
 function App() {
@@ -11,7 +12,9 @@ function App() {
   const [showBookModal, setShowBookModal] = useState(false);
   const [showMemoryModal, setShowMemoryModal] = useState(false);
   const [showFloatingMenu, setShowFloatingMenu] = useState(false);
+  const [showCoverDesigner, setShowCoverDesigner] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
+  const [designingBook, setDesigningBook] = useState(null);
   const [editingMemory, setEditingMemory] = useState(null);
   const [editingTitle, setEditingTitle] = useState(false);
   const [bookForm, setBookForm] = useState({
@@ -71,6 +74,19 @@ function App() {
         setCurrentBook(null);
       }
     }
+  };
+
+  const handleDesignCover = (book) => {
+    setDesigningBook(book);
+    setShowCoverDesigner(true);
+  };
+
+  const handleSaveCoverDesign = (coverDesign) => {
+    setBooks(books.map((book) =>
+      book.id === designingBook.id
+        ? { ...book, coverDesign }
+        : book
+    ));
   };
 
   const handleOpenBook = (book) => {
@@ -379,7 +395,16 @@ function App() {
           setBookForm({ name: '', color: '#2c2c2c' });
           setShowBookModal(true);
         }}
+        onDesignCover={handleDesignCover}
       />
+
+      {showCoverDesigner && (
+        <BookCoverDesigner
+          initialCover={designingBook?.coverDesign}
+          onSave={handleSaveCoverDesign}
+          onClose={() => setShowCoverDesigner(false)}
+        />
+      )}
 
       {showBookModal && (
         <div className="modal-overlay" onClick={() => setShowBookModal(false)}>
