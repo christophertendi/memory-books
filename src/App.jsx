@@ -46,26 +46,24 @@ function App() {
     }
   };
 
-  // Force logout on page load, then listen to auth state
+  // Listen to Firebase auth state (persists across refreshes)
   useEffect(() => {
-    // Logout any existing session first
-    authService.logout().then(() => {
-      // Now listen for auth changes
-      const unsubscribe = authService.onAuthChange((user) => {
-        if (user && user.emailVerified) {
-          setCurrentUser(user.email);
-          setUserId(user.uid);
-          setIsAuthenticated(true);
-        } else {
-          setCurrentUser(null);
-          setUserId(null);
-          setIsAuthenticated(false);
-        }
-        setLoading(false); // Auth state determined
-      });
-
-      return () => unsubscribe();
+    const unsubscribe = authService.onAuthChange((user) => {
+      if (user && user.emailVerified) {
+        console.log('✅ User authenticated:', user.email);
+        setCurrentUser(user.email);
+        setUserId(user.uid);
+        setIsAuthenticated(true);
+      } else {
+        console.log('❌ No authenticated user');
+        setCurrentUser(null);
+        setUserId(null);
+        setIsAuthenticated(false);
+      }
+      setLoading(false);
     });
+
+    return () => unsubscribe();
   }, []);
 
   // Load user-specific books from Firestore
@@ -561,6 +559,7 @@ function App() {
           setShowBookModal(true);
         }}
         onDesignCover={handleDesignCover}
+        onLogout={handleLogout}
       />
 
       {showCoverDesigner && (

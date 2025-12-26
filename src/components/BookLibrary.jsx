@@ -1,7 +1,7 @@
-import { Plus, Edit2, Trash2, Palette } from 'lucide-react';
+import { Plus, Edit2, Trash2, Palette, LogOut } from 'lucide-react';
 import './BookLibrary.css';
 
-const BookLibrary = ({ books, onOpenBook, onEditBook, onDeleteBook, onCreateBook, onDesignCover }) => {
+const BookLibrary = ({ books, onOpenBook, onEditBook, onDeleteBook, onCreateBook, onDesignCover, onLogout }) => {
   const getCoverStyle = (book) => {
     if (!book.coverDesign) {
       return { backgroundColor: book.color };
@@ -48,8 +48,14 @@ const BookLibrary = ({ books, onOpenBook, onEditBook, onDeleteBook, onCreateBook
   return (
     <div className="library-view">
       <div className="library-header">
-        <h1 className="library-title">Memory Books</h1>
-        <p className="library-subtitle">Store your precious moments, one page at a time</p>
+        <div className="library-header-content">
+          <h1 className="library-title">Memory Books</h1>
+          <p className="library-subtitle">Store your precious moments, one page at a time</p>
+        </div>
+        <button className="logout-btn" onClick={onLogout} title="Logout">
+          <LogOut size={20} />
+          Logout
+        </button>
       </div>
 
       <div className="books-stack">
