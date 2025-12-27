@@ -305,7 +305,9 @@ const ScrapbookPage = ({
 
           <button className="external-btn category-btn" onClick={() => setShowCategoryModal(true)}>
             <Tag size={18} />
-            {currentMemory?.category || 'Category'}
+            <span className="category-label">
+              {currentMemory?.category || 'Category'}
+            </span>
           </button>
         </div>
 

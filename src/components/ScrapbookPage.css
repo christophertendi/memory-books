@@ -1112,8 +1112,17 @@
 
   .category-btn {
     padding: 0.5rem 0.75rem;
-    font-size: 0.85rem;
-    max-width: 120px;
+    font-size: 0.75rem;
+    max-width: none;
+    gap: 0.4rem;
+  }
+  
+  .category-btn svg {
+    flex-shrink: 0;
+  }
+  
+  .category-label {
+    max-width: 60px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
