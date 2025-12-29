@@ -3,7 +3,9 @@ import {
   signInWithEmailAndPassword,
   signOut,
   sendEmailVerification,
-  onAuthStateChanged
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
 
@@ -55,6 +57,61 @@ export const authService = {
       return {
         success: false,
         error: this.getErrorMessage(error.code)
+      };
+    }
+  },
+
+  // Google Sign-In
+  async signInWithGoogle() {
+    try {
+      const provider = new GoogleAuthProvider();
+      
+      // Optional: Add custom parameters
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      });
+
+      // Sign in with popup
+      const result = await signInWithPopup(auth, provider);
+      
+      // The signed-in user info
+      const user = result.user;
+      
+      // Google Access Token (if you need it)
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential?.accessToken;
+
+      return {
+        success: true,
+        user: user,
+        token: token
+      };
+    } catch (error) {
+      console.error('Google Sign-In Error:', error);
+      
+      let errorMessage = 'Google sign-in failed. Please try again.';
+      
+      // Handle specific Google Sign-In errors
+      switch (error.code) {
+        case 'auth/popup-closed-by-user':
+          errorMessage = 'Sign-in cancelled. Please try again.';
+          break;
+        case 'auth/popup-blocked':
+          errorMessage = 'Popup was blocked. Please allow popups for this site.';
+          break;
+        case 'auth/account-exists-with-different-credential':
+          errorMessage = 'An account already exists with this email using a different sign-in method.';
+          break;
+        case 'auth/cancelled-popup-request':
+          errorMessage = 'Only one popup request is allowed at a time.';
+          break;
+        default:
+          errorMessage = this.getErrorMessage(error.code);
+      }
+
+      return {
+        success: false,
+        error: errorMessage
       };
     }
   },
