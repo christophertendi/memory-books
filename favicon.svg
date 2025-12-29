@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Background - beige -->
+  <rect width="64" height="64" fill="#e8e4db"/>
+  
+  <!-- Border -->
+  <rect x="2" y="2" width="60" height="60" fill="none" stroke="#a8a399" stroke-width="2"/>
+  
+  <!-- Text "MB" -->
+  <text x="32" y="40" font-family="'Playfair Display', serif" font-size="32" font-weight="bold" fill="#2c2c2c" text-anchor="middle">MB</text>
+</svg>
